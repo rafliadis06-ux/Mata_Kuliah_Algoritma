@@ -59,8 +59,8 @@ int main() {
         }
 
         if (done) break; // semua proses selesai
+        
     }
-
     // Hitung WT dan TAT (arrival time = 0, jadi TAT = CT, WT = TAT - BT)
     int wt[100], tat[100];
     double total_wt = 0.0, total_tat = 0.0;
