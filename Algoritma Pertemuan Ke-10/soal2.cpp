@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
+#include <thread>
+#include <chrono>
 using namespace std;
 
 struct Process {
@@ -9,6 +12,7 @@ struct Process {
     int ct, tat, wt, rt;
     int remaining;
     bool started = false;
+    int lastWait = 0; // untuk menghitung aging
 };
 
 int main() {
@@ -27,17 +31,20 @@ int main() {
     vector<string> gantt;
 
     while (completed < n) {
-        // Aging rule
+        // Aging rule: cek proses yang menunggu
         for (int i = 0; i < n; i++) {
             if (p[i].at <= time && p[i].remaining > 0) {
                 int waiting = time - p[i].at - (p[i].bt - p[i].remaining);
                 if (waiting > 5) {
                     p[i].priority--;
                     priorityChanges++;
+                    // reset agar tidak terus berulang setiap tick
+                    p[i].at = time; 
                 }
             }
         }
 
+        // Pilih proses dengan prioritas tertinggi (angka kecil = lebih tinggi)
         int idx = -1;
         int bestPriority = 1e9;
         for (int i = 0; i < n; i++) {
@@ -54,7 +61,8 @@ int main() {
                 p[idx].rt = time - p[idx].at;
                 p[idx].started = true;
             }
-            gantt.push_back(p[idx].name);
+
+            gantt.push_back(p[idx].name + "(P" + to_string(p[idx].priority) + ")");
             p[idx].remaining--;
             time++;
 
@@ -70,15 +78,34 @@ int main() {
         }
     }
 
-    cout << "\nHasil:\n";
-    cout << "Proses\tAT\tBT\tCT\tTAT\tWT\tRT\tPriority\n";
+    // Output tabel hasil
+    cout << "\nTABEL HASIL:\n";
+    cout << "+--------+-----+-----+---------+-----+-----+-----+\n";
+    cout << "| Proses | AT  | BT  | Priority | CT  | TAT | WT  | RT  |\n";
+    cout << "+--------+-----+-----+---------+-----+-----+-----+\n";
     for (auto &x : p) {
-        cout << x.name << "\t" << x.at << "\t" << x.bt << "\t"
-             << x.ct << "\t" << x.tat << "\t" << x.wt << "\t" << x.rt
-             << "\t" << x.priority << "\n";
+        cout << "| " << setw(6) << x.name 
+             << " | " << setw(3) << x.at 
+             << " | " << setw(3) << x.bt 
+             << " | " << setw(7) << x.priority 
+             << " | " << setw(3) << x.ct 
+             << " | " << setw(3) << x.tat 
+             << " | " << setw(3) << x.wt 
+             << " | " << setw(3) << x.rt << " |\n";
     }
+    cout << "+--------+-----+-----+---------+-----+-----+-----+\n";
 
-    cout << "\nGantt Chart: ";
-    for (auto &g : gantt) cout << g << " ";
-    cout << "\nJumlah perubahan priority: " << priorityChanges << endl;
+    // Gantt Chart
+    cout << "\nGANTT CHART:\n";
+    for (auto &g : gantt) cout << "[" << g << "]";
+    cout << "\n";
+
+    // Jumlah perubahan priority
+    cout << "\nJumlah perubahan priority (aging): " << priorityChanges << endl;
+
+    // Analisis starvation
+    cout << "\nAnalisis Starvation:\n";
+    cout << "- Tanpa aging, proses dengan priority rendah bisa menunggu sangat lama.\n";
+    cout << "- Dengan aging, setiap proses yang menunggu >5 satuan waktu akan naik prioritas.\n";
+    cout << "- Hal ini mencegah starvation karena proses lambat tetap mendapat giliran.\n";
 }
