@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 
 struct Process {
@@ -29,7 +30,7 @@ int main() {
         int idx = -1;
         int minRemaining = 1e9;
 
-        // Cari proses dengan sisa waktu tersingkat yang sudah datang
+        // Cari proses dengan remaining time terkecil
         for (int i = 0; i < n; i++) {
             if (p[i].at <= time && p[i].remaining > 0) {
                 if (p[i].remaining < minRemaining) {
@@ -40,7 +41,6 @@ int main() {
         }
 
         if (idx != -1) {
-            // Jika pertama kali dijalankan → hitung RT
             if (!p[idx].started) {
                 p[idx].rt = time - p[idx].at;
                 p[idx].started = true;
@@ -50,7 +50,6 @@ int main() {
             p[idx].remaining--;
             time++;
 
-            // Jika proses selesai
             if (p[idx].remaining == 0) {
                 p[idx].ct = time;
                 p[idx].tat = p[idx].ct - p[idx].at;
@@ -62,27 +61,40 @@ int main() {
             time++;
         }
 
-        // Hitung preemption (jika proses berganti)
+        // Hitung preemption
         if (gantt.size() > 1 && gantt[gantt.size()-1] != gantt[gantt.size()-2])
             preemptions++;
     }
 
-    // Output hasil
-    cout << "\nTabel Hasil:\n";
-    cout << "Proses\tAT\tBT\tCT\tTAT\tWT\tRT\n";
+    // ====================== OUTPUT TABEL RAPI ======================
+    cout << "\nTABEL HASIL:\n";
+    cout << "+--------+-----+-----+-----+-----+-----+-----+\n";
+    cout << "| Proses | AT  | BT  | CT  | TAT | WT  | RT  |\n";
+    cout << "+--------+-----+-----+-----+-----+-----+-----+\n";
+
     for (auto &x : p) {
-        cout << x.name << "\t" << x.at << "\t" << x.bt << "\t"
-             << x.ct << "\t" << x.tat << "\t" << x.wt << "\t" << x.rt << "\n";
+        cout << "| "
+             << setw(6) << x.name << " | "
+             << setw(3) << x.at   << " | "
+             << setw(3) << x.bt   << " | "
+             << setw(3) << x.ct   << " | "
+             << setw(3) << x.tat  << " | "
+             << setw(3) << x.wt   << " | "
+             << setw(3) << x.rt   << " |\n";
     }
 
-    cout << "\nGantt Chart: ";
-    for (auto &g : gantt) cout << g << " ";
+    cout << "+--------+-----+-----+-----+-----+-----+-----+\n";
+
+    // ====================== GANTT CHART ===========================
+    cout << "\nGANTT CHART:\n";
+    for (auto &g : gantt) cout << "[" << g << "]";
+    cout << "\n";
+
+    // ====================== INFORMASI PREEMPTION ===================
     cout << "\nJumlah Preemption: " << preemptions << endl;
 
-    // Analisis starvation
+    // ====================== ANALISIS STARVATION ====================
     cout << "\nAnalisis Starvation:\n";
-    cout << "- Starvation bisa terjadi jika ada proses dengan burst time besar "
-         << "yang terus menerus di-preempt oleh proses kecil yang datang belakangan.\n";
-    cout << "- Dalam contoh kasus, tidak ada proses yang benar-benar starvation "
-         << "karena semua akhirnya selesai.\n";
+    cout << "- SRTF bisa menyebabkan proses dengan burst time besar terus ditunda oleh proses kecil.\n";
+    cout << "- Namun dalam simulasi ini, semua proses tetap selesai sehingga tidak terjadi starvation permanen.\n";
 }
