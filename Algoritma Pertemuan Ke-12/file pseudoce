@@ -1,0 +1,48 @@
+START
+SET array nim[], nama[], matkul[], nilai[]
+SET jumlahData = 0
+
+REPEAT
+    DISPLAY menu:
+        1. Tambah Data
+        2. Tampilkan Data
+        3. Ubah Data
+        4. Hapus Data
+        5. Keluar
+    INPUT pilihan
+
+    IF pilihan = 1 THEN
+        INPUT nim, nama, matkul, nilai
+        SIMPAN ke array
+        jumlahData++
+    ELSE IF pilihan = 2 THEN
+        IF jumlahData = 0 THEN
+            DISPLAY "Belum ada data"
+        ELSE
+            FOR i = 0 TO jumlahData-1
+                DISPLAY nim[i], nama[i], matkul[i], nilai[i]
+            ENDFOR
+        ENDIF
+    ELSE IF pilihan = 3 THEN
+        INPUT index
+        IF index valid THEN
+            INPUT nama baru, matkul baru, nilai baru
+            UPDATE array
+        ELSE
+            DISPLAY "Nomor data tidak valid"
+        ENDIF
+    ELSE IF pilihan = 4 THEN
+        INPUT index
+        IF index valid THEN
+            SHIFT data array ke kiri
+            jumlahData--
+        ELSE
+            DISPLAY "Nomor data tidak valid"
+        ENDIF
+    ELSE IF pilihan = 5 THEN
+        DISPLAY "Terima kasih"
+    ELSE
+        DISPLAY "Pilihan tidak valid"
+    ENDIF
+UNTIL pilihan = 5
+END
